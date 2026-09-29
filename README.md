@@ -4,6 +4,34 @@ Local-first runtime quality gate for Mandarin TTS. It generates multiple
 GPT-SoVITS candidates, rejects technical failures, applies light post-processing,
 re-validates the result, and records an auditable manifest.
 
+## 这是做什么的
+
+`tts-runtime-gate` 不是一个新的 TTS 模型，而是放在本地 TTS 模型与视频制作
+之间的生产质量控制层。它负责把中文文案转换为朗读文本，生成多个候选，自动
+淘汰漏字、异常停顿、削波等技术故障，对入选音频做轻处理并再次审核，最后输出
+带有模型参数、候选结果和选择理由的 manifest。
+
+它适合本地旁白、批量视频配音以及需要保留生成记录的工作流。GPT-SoVITS 是
+首个完整适配器；其他本地 TTS 可以通过命令适配器接入同一套 WAV 审核流程。
+
+## 与同类项目相比
+
+[`open-tts-eval`](https://github.com/inworld-ai/open-tts-eval) 和
+[`TTSProof`](https://github.com/Mormolykos/ttsproof) 在通用指标、结构故障、报表
+和回归测试方面更成熟，本项目不重复追求这些能力的数量。它的优势在于：
+
+- **中文优先**：分开展示文案与实际朗读文案，处理年份、百分比、中英混读和
+  中文语境；实测 `open-tts-eval 0.1.0` 的默认英文归一化链路不能直接审核中文。
+- **生成时闭环**：不只给已有 WAV 打分，还负责多 seed/checkpoint 候选生成、
+  淘汰、选择、轻处理以及处理后的再次审核。
+- **本地模型优先**：GPT-SoVITS 可直接切换本地权重；通用命令适配器允许接入
+  CosyVoice、Fish Speech、IndexTTS 或其他本地 CLI。
+- **失败关闭**：ASR 或关键测量不可用时不会假装通过，而是拒绝或要求复核。
+- **人工听感有明确位置**：自动门只判断技术缺陷；真人感、电音感和表演质量
+  使用匿名盲听与每个声音独立的黄金参考样本，不让 MOS 或频谱代理冒充耳朵。
+- **可审计交付**：从原文、朗读文本、模型参数、候选、后处理到最终文件均写入
+  manifest，适合真正的旁白生产过程，而不只是离线 benchmark。
+
 This is not another MOS benchmark. Existing evaluators such as
 [`open-tts-eval`](https://github.com/inworld-ai/open-tts-eval) and
 [`TTSProof`](https://github.com/Mormolykos/ttsproof) cover much of the generic
@@ -18,6 +46,9 @@ evaluation space. This project focuses on the missing production loop:
 
 Technical QC does **not** certify naturalness, acting quality, speaker identity,
 or absence of electronic timbre. Those require calibrated listening review.
+
+黄金听感样本按声音单独配置。它只作为人工认可基线，不参与硬性自动评分，且
+默认不提交到公开仓库，以避免上传受许可限制的声音素材或本机路径。
 
 ## Quick start
 
