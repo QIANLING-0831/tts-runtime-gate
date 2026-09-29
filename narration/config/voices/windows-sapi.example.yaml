@@ -1,0 +1,33 @@
+name: windows-sapi-huihui
+language: zh
+provider: command
+
+# The command is executed as an argv list without a shell. Replace this list
+# with any local TTS CLI that accepts text and an output WAV path.
+command:
+  - powershell
+  - -NoProfile
+  - -ExecutionPolicy
+  - Bypass
+  - -File
+  - examples/windows-sapi.ps1
+  - -Text
+  - "{text}"
+  - -Output
+  - "{output}"
+  - -Voice
+  - Microsoft Huihui Desktop
+
+ffmpeg: ffmpeg
+
+inference:
+  seeds: [0]
+
+text:
+  replacements: {}
+  unstable_terms: {}
+
+postprocess:
+  highpass_hz: 65
+  compressor_enabled: false
+  target_lufs: -20

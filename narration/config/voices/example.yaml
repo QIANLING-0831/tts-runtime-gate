@@ -1,5 +1,6 @@
 name: example
 language: zh
+provider: gpt-sovits
 
 # Copy this file to a local, ignored voice profile and replace every path.
 gpt_weight: D:/models/gpt-sovits/voice.ckpt

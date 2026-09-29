@@ -2,6 +2,7 @@ from __future__ import annotations
 
 import importlib.util
 import copy
+import sys
 import tempfile
 import unittest
 from pathlib import Path
@@ -98,6 +99,17 @@ class PipelineTests(unittest.TestCase):
         self.assertFalse(result["passed"])
         self.assertIn("clipping", result["rejection_reasons"])
         self.assertIn("edge_silence_too_long", result["rejection_reasons"])
+
+    def test_command_provider_generates_audio(self):
+        with tempfile.TemporaryDirectory() as directory:
+            output = Path(directory) / "candidate.wav"
+            script = (
+                "import pathlib,sys; "
+                "pathlib.Path(sys.argv[1]).write_bytes(b'RIFFtest')"
+            )
+            config = {"provider": "command", "command": [sys.executable, "-c", script, "{output}"]}
+            pipeline.synthesize_candidate("测试", 7, output, config)
+            self.assertEqual(output.read_bytes(), b"RIFFtest")
 
     def test_artifact_ranking_prefers_reference_like_candidate(self):
         config = copy.deepcopy(self.config)

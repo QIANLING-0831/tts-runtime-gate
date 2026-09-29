@@ -398,6 +398,8 @@ def api_request(method: str, url: str, *, timeout: int, **kwargs: Any):
 
 
 def configure_weights(config: dict[str, Any]) -> None:
+    if config.get("provider", "gpt-sovits") != "gpt-sovits":
+        return
     base = config["api_url"].rstrip("/")
     timeout = int(config.get("request_timeout_seconds", 300))
     api_request("GET", f"{base}/set_gpt_weights", timeout=timeout, params={"weights_path": config["gpt_weight"]})
@@ -405,6 +407,20 @@ def configure_weights(config: dict[str, Any]) -> None:
 
 
 def synthesize_candidate(text: str, seed: int, output: Path, config: dict[str, Any]) -> None:
+    if config.get("provider", "gpt-sovits") == "command":
+        command = config.get("command")
+        if not isinstance(command, list) or not command:
+            raise ValueError("command provider requires a non-empty command list")
+        output.parent.mkdir(parents=True, exist_ok=True)
+        values = {"text": text, "output": str(output.resolve()), "seed": str(seed)}
+        rendered = [str(part).format_map(values) for part in command]
+        completed = subprocess.run(rendered, capture_output=True, text=True)
+        if completed.returncode:
+            raise RuntimeError(f"command provider failed: {completed.stderr[-1000:]}")
+        if not output.exists() or output.stat().st_size == 0:
+            raise RuntimeError("command provider did not create a WAV file")
+        return
+
     inference = config["inference"]
     payload = {
         "text": text,
@@ -558,9 +574,12 @@ def run_pipeline(display_text: str, output_dir: Path, config: dict[str, Any]) ->
 
     configure_weights(config)
     asr = LocalASR(config)
-    reference_metrics = analyze_audio(
-        Path(config["reference_audio"]), config["reference_text"], config
-    )
+    reference_metrics = {}
+    reference_audio = config.get("quality_reference_audio") or config.get("reference_audio")
+    if reference_audio and Path(reference_audio).is_file():
+        reference_metrics = analyze_audio(
+            Path(reference_audio), config.get("reference_text", ""), config
+        )
     raw_candidate_config = copy.deepcopy(config)
     raw_candidate_config["qc"]["fail_on_edge_silence"] = False
     selected_files: list[Path] = []
@@ -630,21 +649,26 @@ def run_pipeline(display_text: str, output_dir: Path, config: dict[str, Any]) ->
     )
     all_passed = all_passed and final_judgment["passed"]
     duration = final_metrics["duration_seconds"]
-    manifest = {
-        "schema_version": 1,
-        "created_at": utc_now(),
-        "provider": "gpt-sovits",
-        "voice": config.get("name", "unknown"),
-        "display_text": prepared["display_text"],
-        "provider_text": prepared["provider_text"],
-        "text_lint": prepared["lint"],
-        "execution": {
+    if config.get("provider", "gpt-sovits") == "gpt-sovits":
+        execution = {
             "reference_audio": config["reference_audio"],
             "reference_text": config["reference_text"],
             "gpt_weight": config["gpt_weight"],
             "sovits_weight": config["sovits_weight"],
             **config["inference"],
-        },
+        }
+    else:
+        execution = {"command": config["command"], **config["inference"]}
+
+    manifest = {
+        "schema_version": 1,
+        "created_at": utc_now(),
+        "provider": config.get("provider", "gpt-sovits"),
+        "voice": config.get("name", "unknown"),
+        "display_text": prepared["display_text"],
+        "provider_text": prepared["provider_text"],
+        "text_lint": prepared["lint"],
+        "execution": execution,
         "sections": section_reports,
         "final_audio_qc": {"metrics": final_metrics, **final_judgment},
         "pre_master_file": str(pre_master_path.resolve()),

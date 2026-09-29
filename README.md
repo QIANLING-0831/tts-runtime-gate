@@ -11,6 +11,7 @@ evaluation space. This project focuses on the missing production loop:
 
 - Mandarin display-text to spoken-text normalization;
 - local GPT-SoVITS candidate generation across multiple seeds/checkpoints;
+- a shell-free command provider for other local TTS CLIs;
 - fail-closed ASR and audio-health checks;
 - post-processing followed by mandatory re-validation;
 - explicit `PASS`, rejection reasons, and provenance in one manifest.
@@ -52,9 +53,28 @@ python -m unittest discover -s narration/tests -v
 
 ## Scope and status
 
-The current provider adapter targets GPT-SoVITS. The WAV-level `qc` command is
-provider-neutral. A second local provider adapter and competitor execution on a
-shared Mandarin corpus are planned before a stable release.
+The included providers are GPT-SoVITS and a generic command adapter. The latter
+has been exercised end-to-end with the built-in Windows Mandarin SAPI voice;
+`narration/config/voices/windows-sapi.example.yaml` is the working example.
+CosyVoice, Fish Speech, IndexTTS, or another local engine can be connected by
+replacing the argv list, without changing the QC core. The WAV-level `qc`
+command remains provider-neutral.
+
+Prepare an anonymous listening review:
+
+```powershell
+python narration/blind_review.py prepare `
+  --candidate "engine-a=path/to/a.wav" `
+  --candidate "engine-b=path/to/b.wav" `
+  --output narration/runs/blind-review
+```
+
+Fill the generated `scores.json` without opening `private-mapping.json`, then
+produce the revealed ranking:
+
+```powershell
+python narration/blind_review.py summarize narration/runs/blind-review
+```
 
 See [the evaluation plan](docs/evaluation/tts-competitor-test-plan.md) and
 [the landscape review](docs/research/tts-quality-gate-landscape.md).
