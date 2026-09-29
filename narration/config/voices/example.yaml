@@ -1,0 +1,22 @@
+name: example
+language: zh
+
+# Copy this file to a local, ignored voice profile and replace every path.
+gpt_weight: D:/models/gpt-sovits/voice.ckpt
+sovits_weight: D:/models/gpt-sovits/voice.pth
+reference_audio: D:/models/gpt-sovits/reference.wav
+reference_text: 这是一段中性、清晰的参考语音。
+quality_reference_audio: D:/models/gpt-sovits/quality-reference.wav
+ffmpeg: ffmpeg
+
+inference:
+  speed_factor: 1.00
+
+text:
+  replacements: {}
+  unstable_terms: {}
+
+postprocess:
+  highpass_hz: 65
+  compressor_enabled: false
+  target_lufs: -20

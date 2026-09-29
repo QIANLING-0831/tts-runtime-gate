@@ -1,0 +1,14 @@
+__pycache__/
+*.py[cod]
+.venv/
+.pytest_cache/
+
+# Generated audio and manifests may contain local paths or licensed voices.
+narration/runs/
+
+# Local voice profiles contain machine paths and may reference private models.
+narration/config/voices/*.local.yaml
+narration/config/voices/furina.yaml
+
+# Research for the parent video project, unrelated to this repository.
+docs/research/open-source-tools-for-educational-short-videos.md

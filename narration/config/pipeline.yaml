@@ -1,0 +1,67 @@
+api_url: http://127.0.0.1:9880
+request_timeout_seconds: 300
+
+inference:
+  text_split_method: cut3
+  fragment_interval: 0.15
+  top_k: 10
+  top_p: 0.90
+  temperature: 0.80
+  repetition_penalty: 1.25
+  speed_factor: 1.00
+  batch_size: 1
+  seeds: [104729, 130363, 155921]
+
+text:
+  min_fragment_chars: 8
+  replacements:
+    AI: 人工智能
+    AIGC: 人工智能生成内容
+
+qc:
+  asr_enabled: true
+  asr_model: small
+  asr_device: cpu
+  asr_compute_type: int8
+  # Fail closed: a missing ASR result is not evidence that the text is complete.
+  fail_on_asr_unavailable: true
+  max_cer: 0.12
+  short_text_chars: 12
+  short_text_allowed_asr_errors: 3
+  long_text_min_allowed_asr_errors: 2
+  silence_threshold_db: -45
+  max_internal_silence_seconds: 0.25
+  max_clip_fraction: 0.001
+  max_local_pitch_semitones: 4.0
+  min_duration_seconds: 0.35
+  # A global pitch scan has no semantic emphasis context. It ranks candidates
+  # but does not hard-reject them; word-aligned checks may opt in later.
+  fail_on_pitch_spike: false
+  fail_on_edge_silence: true
+  max_edge_silence_seconds: 0.40
+  artifact_ranking:
+    # Disabled until a perceptual model is calibrated against human labels.
+    # Simple spectral proxies did not track perceived electronic timbre.
+    enabled: false
+    max_penalty: 8.0
+    weights:
+      spectral_flatness: 1.0
+      high_frequency_energy_ratio: 1.5
+      spectral_flux: 1.0
+
+postprocess:
+  enabled: true
+  trim_top_db: 45
+  edge_padding_seconds: 0.08
+  highpass_hz: 65
+  compressor_enabled: false
+  compressor_threshold_db: -18
+  compressor_ratio: 2.0
+  compressor_attack_ms: 20
+  compressor_release_ms: 150
+  target_lufs: -20
+  true_peak_db: -1.0
+  loudness_range: 7
+  sentence_gap_seconds: 0.24
+  question_gap_seconds: 0.28
+  master_after_join: true

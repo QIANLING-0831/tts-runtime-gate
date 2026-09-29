@@ -1,0 +1,8 @@
+PyYAML
+librosa
+numpy
+soundfile
+requests
+faster-whisper
+opencc-python-reimplemented
+cn2an
