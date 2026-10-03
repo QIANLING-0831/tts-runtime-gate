@@ -1,4 +1,22 @@
-# tts-runtime-gate
+<p align="center"><img src=".github/readme/banner.svg" alt="TTS Runtime Gate — 中文旁白的运行时质量门" width="100%"></p>
+
+<h1 align="center">TTS Runtime Gate · 中文旁白的运行时质量门</h1>
+
+<p align="center">围绕本地 TTS 建立候选生成、技术检查、轻处理和再次验证的旁白生产流程。</p>
+
+<p align="center"><img src="https://img.shields.io/badge/docs-%E4%B8%AD%E6%96%87-fb7185?style=flat-square&amp;labelColor=172033" alt="docs: 中文"> <img src="https://img.shields.io/badge/maintainer-QIANLING-0831-fb7185?style=flat-square&amp;labelColor=172033" alt="maintainer: QIANLING-0831"> </p>
+
+<p align="center"><a href="#这是做什么的">这是做什么的</a> &nbsp; · &nbsp; <a href="#与同类项目相比">与同类项目相比</a> &nbsp; · &nbsp; <a href="#quick-start">Quick start</a> &nbsp; · &nbsp; <a href="#scope-and-status">Scope and status</a></p>
+
+---
+
+## 项目概览
+
+| 方向 | 内容 |
+| --- | --- |
+| **候选生成** | GPT-SoVITS 与通用命令适配器 |
+| **技术审核** | ASR、音频健康与处理后复验 |
+| **听感复核** | 匿名盲听与可追溯的 manifest |
 
 Local-first runtime quality gate for Mandarin TTS. It generates multiple
 GPT-SoVITS candidates, rejects technical failures, applies light post-processing,
